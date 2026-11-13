@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --color-accent: #ff5a4f;
+}
+
+:root { color-scheme: light dark; }
+html, body, #root { height: 100%; margin: 0; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; user-select: none; cursor: default; }
+html.overlay, html.overlay body { background: transparent; overflow: hidden; }
+.drag { --wails-draggable: drag; }
+.no-drag { --wails-draggable: no-drag; }
