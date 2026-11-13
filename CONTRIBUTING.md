@@ -1,6 +1,6 @@
 # Contributing to Sayki
 
-Thanks for helping out. Bug reports, fixes and features are all welcome.
+Thanks for helping out! Bug reports, fixes and features are all welcome.
 
 ## Contributor License Agreement
 
