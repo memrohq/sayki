@@ -68,6 +68,7 @@ ifneq ($(DEV_ID),)
 	xcrun stapler staple $(DMG)
 	spctl --assess --type open --context context:primary-signature -v $(DMG)
 endif
+	rm -rf $(RELEASE)/Sayki.app # only the DMG is the release; a loose copy shows up as a second Sayki in Spotlight
 	@echo "built $(DMG)"
 
 $(DMGBUILD):
