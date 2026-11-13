@@ -3,7 +3,11 @@ SHERPA   := $(shell go list -m -f '{{.Dir}}' github.com/k2-fsa/sherpa-onnx-go-ma
 # A stable signing identity keeps macOS privacy grants across rebuilds; ad-hoc ("-") loses them.
 SIGN_ID  ?= $(or $(shell security find-identity -v -p codesigning | awk -F'"' 'NR==1 && /"/ {print $$2}'),-)
 
-.PHONY: app frontend test run clean
+VERSION  := $(shell /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" build/darwin/Info.plist)
+RELEASE  := build/release
+DMG      := $(RELEASE)/Sayki-$(VERSION)-$(shell uname -m).dmg
+
+.PHONY: app frontend test run clean dmg
 
 app: frontend build/darwin/icon.icns
 	rm -rf $(APP) && mkdir -p $(APP)/Contents/MacOS $(APP)/Contents/Frameworks $(APP)/Contents/Resources
@@ -37,5 +41,16 @@ test:
 run: app
 	open $(APP)
 
+# Release builds are ad-hoc signed into their own folder: an "Apple Development"
+# identity would embed its owner's email, and only Developer ID + notarization
+# avoids Gatekeeper's "Open Anyway" step. Your local build/bin app is untouched.
+dmg:
+	$(MAKE) app SIGN_ID=- APP=$(RELEASE)/Sayki.app
+	rm -rf $(RELEASE)/dmg && mkdir -p $(RELEASE)/dmg
+	cp -R $(RELEASE)/Sayki.app $(RELEASE)/dmg/ && ln -s /Applications $(RELEASE)/dmg/Applications
+	hdiutil create -volname Sayki -srcfolder $(RELEASE)/dmg -ov -format UDZO $(DMG)
+	rm -rf $(RELEASE)/dmg
+	@echo "built $(DMG)"
+
 clean:
-	rm -rf build/bin frontend/dist/assets
+	rm -rf build/bin build/release frontend/dist/assets
