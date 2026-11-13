@@ -1,4 +1,4 @@
-module github.com/getvybe/sayki
+module github.com/memrohq/sayki
 
 go 1.26.0
 

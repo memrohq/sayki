@@ -27,7 +27,7 @@ export type Perms = { microphone: string; accessibility: string };
 export type HistoryItem = { id: number; text: string; createdAt: string };
 
 const call = <T,>(method: string, ...args: unknown[]): Promise<T> =>
-  Call.ByName(`github.com/getvybe/sayki/internal/app.App.${method}`, ...args) as Promise<T>;
+  Call.ByName(`github.com/memrohq/sayki/internal/app.App.${method}`, ...args) as Promise<T>;
 
 export const api = {
   getSettings: () => call<Settings>("GetSettings"),

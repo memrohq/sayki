@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/getvybe/sayki/internal/audio"
-	"github.com/getvybe/sayki/internal/models"
-	"github.com/getvybe/sayki/internal/permissions"
-	"github.com/getvybe/sayki/internal/settings"
-	"github.com/getvybe/sayki/internal/shortcuts"
+	"github.com/memrohq/sayki/internal/audio"
+	"github.com/memrohq/sayki/internal/models"
+	"github.com/memrohq/sayki/internal/permissions"
+	"github.com/memrohq/sayki/internal/settings"
+	"github.com/memrohq/sayki/internal/shortcuts"
 )
 
 // Methods below are called from the frontend via Wails bindings.
