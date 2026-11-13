@@ -54,7 +54,7 @@ Sayki is dual-licensed:
   to users over a network, you must release your complete source code under the AGPL.
 - **Commercial license:** if you want to ship Sayki, or a product built on it,
   without the AGPL's source-sharing obligations, buy a commercial license.
-  Contact **COMMERCIAL_CONTACT_EMAIL**.
+  Contact **[subal@memro.co](mailto:subal@memro.co)**.
 
 Third-party components keep their own licenses; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
