@@ -11,6 +11,9 @@ NOTARY   ?= sayki-notary
 VERSION  := $(shell /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" build/darwin/Info.plist)
 RELEASE  := build/release
 DMG      := $(RELEASE)/Sayki-$(VERSION)-$(shell uname -m).dmg
+# dmgbuild lays out the installer window without scripting Finder; kept in a local venv.
+DMGBUILD := build/.venv/bin/dmgbuild
+DMG_BG   := build/darwin/dmg-background.png
 
 .PHONY: app frontend test run clean dmg
 
@@ -51,17 +54,14 @@ run: app
 # runtime, notarized (keychain profile $(NOTARY)) and stapled. Without one it is
 # ad-hoc signed (never "Apple Development", which embeds its owner's email) and
 # testers need System Settings → Privacy & Security → Open Anyway.
-dmg:
+dmg: $(DMGBUILD) $(DMG_BG)
 ifeq ($(DEV_ID),)
 	@echo "No Developer ID Application identity found: building an ad-hoc signed test DMG."
 	$(MAKE) app SIGN_ID=- APP=$(RELEASE)/Sayki.app
 else
 	$(MAKE) app SIGN_ID="$(DEV_ID)" APP=$(RELEASE)/Sayki.app SIGN_FLAGS="--options runtime --timestamp" ENTITLEMENTS="--entitlements build/darwin/entitlements.plist"
 endif
-	rm -rf $(RELEASE)/dmg && mkdir -p $(RELEASE)/dmg
-	cp -R $(RELEASE)/Sayki.app $(RELEASE)/dmg/ && ln -s /Applications $(RELEASE)/dmg/Applications
-	hdiutil create -volname Sayki -srcfolder $(RELEASE)/dmg -ov -format UDZO $(DMG)
-	rm -rf $(RELEASE)/dmg
+	$(DMGBUILD) -s build/darwin/dmg-settings.py -D app=$(RELEASE)/Sayki.app -D background=$(DMG_BG) -D icon=build/darwin/icon.icns Sayki $(DMG)
 ifneq ($(DEV_ID),)
 	codesign --force --timestamp -s "$(DEV_ID)" $(DMG)
 	xcrun notarytool submit $(DMG) --keychain-profile $(NOTARY) --wait
@@ -69,6 +69,13 @@ ifneq ($(DEV_ID),)
 	spctl --assess --type open --context context:primary-signature -v $(DMG)
 endif
 	@echo "built $(DMG)"
+
+$(DMGBUILD):
+	python3 -m venv build/.venv && build/.venv/bin/pip install -q dmgbuild==1.6.7
+
+$(DMG_BG): build/darwin/dmg-background.swift
+	swift $< $@ 1
+	swift $< $(@:.png=@2x.png) 2
 
 clean:
 	rm -rf build/bin build/release frontend/dist/assets
