@@ -44,7 +44,6 @@ const (
 // AppleID is the built-in macOS recognizer: nothing to download.
 const AppleID = "apple"
 
-
 // PunctID is the English punctuation + casing model.
 const PunctID = "punct-en"
 

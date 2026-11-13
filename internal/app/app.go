@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/getvybe/sayki/internal/audio"
-	"github.com/getvybe/sayki/internal/injection"
-	"github.com/getvybe/sayki/internal/models"
-	"github.com/getvybe/sayki/internal/permissions"
-	"github.com/getvybe/sayki/internal/settings"
-	"github.com/getvybe/sayki/internal/shortcuts"
-	"github.com/getvybe/sayki/internal/transcription"
+	"github.com/memrohq/sayki/internal/audio"
+	"github.com/memrohq/sayki/internal/injection"
+	"github.com/memrohq/sayki/internal/models"
+	"github.com/memrohq/sayki/internal/permissions"
+	"github.com/memrohq/sayki/internal/settings"
+	"github.com/memrohq/sayki/internal/shortcuts"
+	"github.com/memrohq/sayki/internal/transcription"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 

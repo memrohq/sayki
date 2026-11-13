@@ -3,7 +3,7 @@ package shortcuts
 import (
 	"testing"
 
-	"github.com/getvybe/sayki/internal/settings"
+	"github.com/memrohq/sayki/internal/settings"
 )
 
 func TestParse(t *testing.T) {

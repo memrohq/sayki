@@ -9,9 +9,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/getvybe/sayki/frontend"
-	"github.com/getvybe/sayki/internal/app"
-	"github.com/getvybe/sayki/internal/settings"
+	"github.com/memrohq/sayki/frontend"
+	"github.com/memrohq/sayki/internal/app"
+	"github.com/memrohq/sayki/internal/settings"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
@@ -42,7 +42,7 @@ func main() {
 		Mac: application.MacOptions{
 			ActivationPolicy: application.ActivationPolicyAccessory, // menu bar only, no Dock icon
 		},
-		SingleInstance: &application.SingleInstanceOptions{UniqueID: "co.getvybe.sayki"},
+		SingleInstance: &application.SingleInstanceOptions{UniqueID: "co.memro.sayki"},
 	})
 	core.Attach(w, trayIcon)
 	if err := w.Run(); err != nil {
