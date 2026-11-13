@@ -1,0 +1,6 @@
+.DS_Store
+build/bin/
+frontend/node_modules/
+# Vite output is embedded by frontend/embed.go; the placeholder keeps `go build` working on a fresh clone.
+frontend/dist/*
+!frontend/dist/.gitkeep
