@@ -63,23 +63,35 @@ static AVAudioPCMBuffer *pcm(const float *samples, int n) {
 // utterance they overlap. Utterances keeps them in order by word timestamps.
 @interface Utterances : NSObject
 @property(strong) NSMutableArray<NSString *> *texts;
-@property(assign) NSTimeInterval lastStart, lastEnd;
+@property(assign) NSTimeInterval lastEnd; // end of the last utterance
+@property(assign) BOOL lastTimed;         // whether Apple gave it timestamps
+@property(assign) BOOL useTiming;         // only final results have recording-relative timestamps
 @end
 @implementation Utterances
-- (instancetype)init { if ((self = [super init])) { _texts = [NSMutableArray array]; _lastStart = -1; } return self; }
+- (instancetype)init { if ((self = [super init])) { _texts = [NSMutableArray array]; } return self; }
 - (void)add:(SFTranscription *)t {
-	if (t.formattedString.length == 0) return;
+	NSString *text = t.formattedString;
+	if (text.length == 0) return;
 	NSTimeInterval start = t.segments.firstObject.timestamp;
 	NSTimeInterval end = t.segments.lastObject.timestamp + t.segments.lastObject.duration;
-	// A result starting after the previous utterance ended is a new utterance;
-	// anything overlapping it (same start, or a revision) replaces it.
-	if (self.texts.count == 0 || start >= self.lastEnd - 0.05) {
-		[self.texts addObject:t.formattedString];
+	BOOL timed = end > 0; // in-progress results carry zero timestamps
+	BOOL fresh;
+	if (self.texts.count == 0) {
+		fresh = YES;
+	} else if (self.useTiming && timed && self.lastTimed) {
+		fresh = start >= self.lastEnd - 0.05; // starts after the previous utterance ended
 	} else {
-		self.texts[self.texts.count - 1] = t.formattedString;
+		// No timing: a revision keeps the same beginning and roughly its length,
+		// while a new utterance after a pause starts differently ("The first…"
+		// then "The second…") or begins as a short fragment ("The").
+		NSString *prev = self.texts.lastObject;
+		NSUInteger common = [text commonPrefixWithString:prev options:NSCaseInsensitiveSearch].length;
+		fresh = common < MIN(text.length, prev.length) / 2 || text.length < prev.length / 2;
 	}
-	self.lastStart = start;
+	if (fresh) [self.texts addObject:text];
+	else self.texts[self.texts.count - 1] = text;
 	self.lastEnd = end;
+	self.lastTimed = timed;
 }
 // Joins utterances, ending one with a full stop when the next starts a new
 // sentence (Apple doesn't punctuate the end of an utterance before a pause).
@@ -143,6 +155,7 @@ static char *appleTranscribe(void *rp, const float *samples, int n, char **err) 
 	SFSpeechAudioBufferRecognitionRequest *req = newRequest(NO);
 	dispatch_semaphore_t done = dispatch_semaphore_create(0);
 	Utterances *utterances = [Utterances new];
+	utterances.useTiming = YES;
 	__block NSString *failure = nil;
 	__block BOOL signalled = NO;
 	NSObject *lock = [NSObject new];
