@@ -174,6 +174,7 @@ func (a *App) started() {
 		a.wails.Quit()
 		return
 	}
+	go install.EjectInstallers() // the DMG window closes itself once Sayki runs from Applications
 	a.mu.Lock()
 	cfg := a.cfg
 	a.mu.Unlock()

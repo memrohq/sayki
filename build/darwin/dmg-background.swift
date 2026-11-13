@@ -55,7 +55,7 @@ func centred(_ text: String, y: Double, size: CGFloat, weight: NSFont.Weight, co
     NSGraphicsContext.restoreGraphicsState()
 }
 centred("Drag Sayki into Applications", y: 262, size: 15, weight: .semibold, color: NSColor(white: 0.18, alpha: 1))
-centred("Then open it from Applications or Spotlight", y: 286, size: 12, weight: .regular, color: NSColor(white: 0.45, alpha: 1))
+centred("Then open Sayki from Applications. This window closes by itself.", y: 286, size: 12, weight: .regular, color: NSColor(white: 0.45, alpha: 1))
 
 NSGraphicsContext.restoreGraphicsState()
 try! rep.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: CommandLine.arguments[1]))

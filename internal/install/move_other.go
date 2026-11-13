@@ -5,3 +5,6 @@ package install
 
 // OfferMove is macOS-only.
 func OfferMove() (bool, error) { return false, nil }
+
+// EjectInstallers is macOS-only.
+func EjectInstallers() {}
