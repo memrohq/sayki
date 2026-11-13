@@ -14,6 +14,7 @@ import (
 
 	"github.com/memrohq/sayki/internal/audio"
 	"github.com/memrohq/sayki/internal/injection"
+	"github.com/memrohq/sayki/internal/install"
 	"github.com/memrohq/sayki/internal/models"
 	"github.com/memrohq/sayki/internal/permissions"
 	"github.com/memrohq/sayki/internal/settings"
@@ -161,6 +162,18 @@ func (a *App) Attach(w *application.App, trayIcon []byte) {
 }
 
 func (a *App) started() {
+	var moved bool
+	application.InvokeSync(func() {
+		var err error
+		if moved, err = install.OfferMove(); err != nil {
+			slog.Warn("move to Applications", "err", err)
+		}
+	})
+	if moved {
+		slog.Info("moved to Applications; relaunching")
+		a.wails.Quit()
+		return
+	}
 	a.mu.Lock()
 	cfg := a.cfg
 	a.mu.Unlock()

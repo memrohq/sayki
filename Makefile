@@ -11,11 +11,12 @@ NOTARY   ?= sayki-notary
 VERSION  := $(shell /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" build/darwin/Info.plist)
 RELEASE  := build/release
 DMG      := $(RELEASE)/Sayki-$(VERSION)-$(shell uname -m).dmg
+ZIP      := $(RELEASE)/Sayki-$(VERSION)-$(shell uname -m).zip
 # dmgbuild lays out the installer window without scripting Finder; kept in a local venv.
 DMGBUILD := build/.venv/bin/dmgbuild
 DMG_BG   := build/darwin/dmg-background.png
 
-.PHONY: app frontend test run clean dmg
+.PHONY: app frontend test run clean dmg zip
 
 app: frontend build/darwin/icon.icns
 	rm -rf $(APP) && mkdir -p $(APP)/Contents/MacOS $(APP)/Contents/Frameworks $(APP)/Contents/Resources
@@ -70,6 +71,22 @@ ifneq ($(DEV_ID),)
 endif
 	rm -rf $(RELEASE)/Sayki.app # only the DMG is the release; a loose copy shows up as a second Sayki in Spotlight
 	@echo "built $(DMG)"
+
+# The ZIP download skips the disk image: unzip, open, and Sayki offers to move
+# itself into Applications. It must be notarized (with the ticket stapled to the
+# app inside) or Gatekeeper blocks it, so a Developer ID identity is required.
+zip:
+ifeq ($(DEV_ID),)
+	$(error make zip needs a "Developer ID Application" signing identity)
+endif
+	$(MAKE) app SIGN_ID="$(DEV_ID)" APP=$(RELEASE)/Sayki.app SIGN_FLAGS="--options runtime --timestamp" ENTITLEMENTS="--entitlements build/darwin/entitlements.plist"
+	rm -f $(ZIP) && ditto -c -k --keepParent $(RELEASE)/Sayki.app $(ZIP)
+	xcrun notarytool submit $(ZIP) --keychain-profile $(NOTARY) --wait
+	xcrun stapler staple $(RELEASE)/Sayki.app
+	rm -f $(ZIP) && ditto -c -k --keepParent $(RELEASE)/Sayki.app $(ZIP)
+	spctl --assess --type execute -v $(RELEASE)/Sayki.app
+	rm -rf $(RELEASE)/Sayki.app
+	@echo "built $(ZIP)"
 
 $(DMGBUILD):
 	python3 -m venv build/.venv && build/.venv/bin/pip install -q dmgbuild==1.6.7
