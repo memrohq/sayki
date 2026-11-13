@@ -10,6 +10,7 @@ export type Settings = {
   overlay: "bottom" | "top" | "hidden";
   launchAtLogin: boolean;
   historyEnabled: boolean;
+  sounds: boolean;
 };
 export type Status = {
   state: "idle" | "loading" | "recording" | "finishing" | "error";
@@ -54,6 +55,12 @@ export function on<T>(name: string, fn: (data: T) => void): () => void {
   return Events.On(name, (e: { data: T }) => fn(e.data));
 }
 
+// Keys usable alone; must match shortcuts.SoloKeys in Go.
+export const soloKeys: [string, string][] = [
+  ["fn", "🌐 Fn"], ["ctrl", "⌃ Control"], ["rightoption", "Right ⌥ Option"], ["rightcmd", "Right ⌘ Command"],
+];
+
 export const shortcutLabel = (s: string) =>
+  soloKeys.find(([k]) => k === s)?.[1] ??
   s.replace("ctrl+", "⌃").replace("option+", "⌥").replace("shift+", "⇧").replace("cmd+", "⌘")
     .replace("Key", "").replace("Digit", "");

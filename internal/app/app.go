@@ -18,6 +18,7 @@ import (
 	"github.com/memrohq/sayki/internal/permissions"
 	"github.com/memrohq/sayki/internal/settings"
 	"github.com/memrohq/sayki/internal/shortcuts"
+	"github.com/memrohq/sayki/internal/sound"
 	"github.com/memrohq/sayki/internal/transcription"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
@@ -350,6 +351,7 @@ func (a *App) Start() {
 	a.setStatus(Status{State: StateRecording, Language: lang, StartedAt: s.started.UnixMilli()})
 	a.wails.Event.Emit(EvTranscript, "")
 	a.showOverlay(false)
+	a.cue(sound.Start)
 	slog.Info("recording started")
 
 	stream := eng.NewStream()
@@ -429,12 +431,28 @@ func (a *App) Stop() {
 		a.status.State = StateFinishing
 	}
 	lang := a.status.Language
+	cancelled := s != nil && s.cancel
 	a.mu.Unlock()
 	if s == nil || !recording {
 		return
 	}
+	if cancelled {
+		a.cue(sound.Cancel)
+	} else {
+		a.cue(sound.Stop)
+	}
 	a.wails.Event.Emit(EvState, Status{State: StateFinishing, Language: lang})
 	s.cap.Stop() // closes Samples → pipeline flushes → collect() inserts
+}
+
+// cue plays a feedback sound unless the user turned sounds off.
+func (a *App) cue(name string) {
+	a.mu.Lock()
+	on := a.cfg.Sounds
+	a.mu.Unlock()
+	if on {
+		sound.Play(name)
+	}
 }
 
 // Cancel ends the session without inserting anything.

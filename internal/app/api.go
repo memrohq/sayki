@@ -197,6 +197,9 @@ func (a *App) ToggleRecording() {
 
 // ShortcutLabel renders "ctrl+option+Space" as "⌃⌥Space".
 func ShortcutLabel(s string) string {
+	if l, ok := shortcuts.SoloKeys[s]; ok {
+		return l
+	}
 	r := strings.NewReplacer("ctrl+", "⌃", "option+", "⌥", "shift+", "⇧", "cmd+", "⌘", "Key", "", "Digit", "")
 	return r.Replace(s)
 }

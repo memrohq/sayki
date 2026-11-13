@@ -14,12 +14,26 @@ import (
 type Accelerator struct {
 	Ctrl, Option, Shift, Cmd bool
 	Code                     string
+	Solo                     string // a single key used alone (see SoloKeys); Code is then empty
 }
+
+// SoloKeys are keys usable on their own, like Wispr Flow's Fn. macOS can't
+// register these as hotkeys, so an event tap watches them instead.
+var SoloKeys = map[string]string{
+	"fn":          "🌐 Fn",
+	"ctrl":        "⌃ Control",
+	"rightoption": "Right ⌥ Option",
+	"rightcmd":    "Right ⌘ Command",
+}
+
 
 var ErrUnsupported = errors.New("global shortcuts are not implemented on this platform yet")
 
 func Parse(s string) (Accelerator, error) {
 	var a Accelerator
+	if _, ok := SoloKeys[strings.ToLower(s)]; ok {
+		return Accelerator{Solo: strings.ToLower(s)}, nil
+	}
 	parts := strings.Split(s, "+")
 	for i, p := range parts {
 		if i == len(parts)-1 {

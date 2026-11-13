@@ -35,6 +35,7 @@ type Settings struct {
 	Overlay        string `json:"overlay"`
 	LaunchAtLogin  bool   `json:"launchAtLogin"`
 	HistoryEnabled bool   `json:"historyEnabled"`
+	Sounds         bool   `json:"sounds"` // start/stop/cancel cues
 }
 
 func Defaults() Settings {
@@ -45,6 +46,7 @@ func Defaults() Settings {
 		Punctuation:  true,
 		InjectMethod: InjectPaste,
 		Overlay:      OverlayBottom,
+		Sounds:       true,
 	}
 }
 

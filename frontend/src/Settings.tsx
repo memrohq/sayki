@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { api, on, shortcutLabel, type Download, type HistoryItem, type Mic, type Model, type Perms, type Settings } from "./api";
+import { api, on, shortcutLabel, soloKeys, type Download, type HistoryItem, type Mic, type Model, type Perms, type Settings } from "./api";
 
 type Tab = "general" | "models" | "permissions" | "history";
 const TABS: { id: Tab; label: string }[] = [
@@ -122,11 +122,21 @@ function General({ s, save }: { s: Settings; save: (p: Partial<Settings>) => voi
   return (
     <>
       <Section title="Dictation">
-        <Row label="Shortcut" hint="Works in any app. Fn can't be used for global shortcuts on macOS.">
-          <ShortcutRecorder value={s.shortcut} set={(shortcut) => save({ shortcut })} />
+        <Row label="Shortcut" hint={shortcutHint(s.shortcut)}>
+          <div className="flex gap-2">
+            <ShortcutRecorder value={s.shortcut} set={(shortcut) => save({ shortcut })} />
+            <Select
+              value={soloKeys.some(([k]) => k === s.shortcut) ? s.shortcut : ""}
+              set={(k) => k && save({ shortcut: k })}
+              options={[["", "Single key…"], ...soloKeys]}
+            />
+          </div>
         </Row>
         <Row label="Mode" hint={s.mode === "push" ? "Hold the shortcut while you speak." : "Press once to start, again to insert."}>
           <Select value={s.mode} set={(mode) => save({ mode })} options={[["toggle", "Toggle"], ["push", "Push to talk"]]} />
+        </Row>
+        <Row label="Sounds" hint="A soft click when recording starts, stops or is cancelled.">
+          <Toggle on={s.sounds} set={(sounds) => save({ sounds })} />
         </Row>
         <Row label="Microphone">
           <Select
@@ -157,6 +167,13 @@ function General({ s, save }: { s: Settings; save: (p: Partial<Settings>) => voi
       </Section>
     </>
   );
+}
+
+function shortcutHint(sc: string) {
+  if (sc === "fn") return "Tap Fn to start and stop, or hold it. Set System Settings → Keyboard → “Press 🌐 key to” → Do Nothing, so macOS doesn't also react.";
+  if (sc === "ctrl") return "Tap or hold Control alone. Careful: holding Control a moment before Ctrl+C or Ctrl+A will start dictation.";
+  if (soloKeys.some(([k]) => k === sc)) return "Tap the key alone to start and stop, or hold it while you speak.";
+  return "Works in any app. Or pick a single key, like Fn, as Wispr Flow does.";
 }
 
 function ShortcutRecorder({ value, set }: { value: string; set: (v: string) => void }) {
